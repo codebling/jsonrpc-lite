@@ -88,11 +88,12 @@ const errorObj = jsonrpc.error('123', new jsonrpc.JsonRpcError('some error', 99)
 // }
 ```
 
-### jsonrpc.parse(message)
+### jsonrpc.parse(message, isStrict)
 
 Takes a JSON-RPC 2.0 payload (string) and tries to parse it into a JSON. If successful, determine what object is it (response, notification, success, error, or invalid), and return it's type and properly formatted object.
 
 - `message`: {String}
+- `isStrict`: {Boolean} set to true to require the presence of "jsonrpc":"2.0" field. Default: false 
 
 return an array, or an object of this format:
 
@@ -148,11 +149,12 @@ return an array, or an object of this format:
 }]
 ```
 
-### jsonrpc.parseObject(message)
+### jsonrpc.parseObject(message, isStrict)
 
 Takes a JSON-RPC 2.0 payload (Object) and tries to parse it into a JSON. If successful, determine what object is it (response, notification, success, error, or invalid), and return it's type and properly formatted object.
 
 - `message`: {Object}
+- `isStrict`: {Boolean} set to true to require the presence of "jsonrpc":"2.0" field. Default: false 
 
 return an array, or an object same as `jsonrpc.parse`.
 

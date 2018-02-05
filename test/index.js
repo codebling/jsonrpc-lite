@@ -202,7 +202,7 @@ function test (jsonrpc) {
       assert.strictEqual(res.payload.message, 'Parse error')
       assert.strictEqual(res.payload.data, '{"id":')
 
-      res = jsonrpc.parse('{}')
+      res = jsonrpc.parse('{}', true)
       assert.strictEqual(res.type, 'invalid')
       assert.deepEqual(res.payload, {code: -32600, message: 'Invalid request', data: {}})
 
@@ -210,7 +210,7 @@ function test (jsonrpc) {
       assert.strictEqual(res.type, 'invalid')
       assert.deepEqual(res.payload, {code: -32600, message: 'Invalid request', data: []})
 
-      res = jsonrpc.parse('{"id":123,"method":"update"}')
+      res = jsonrpc.parse('{"id":123,"method":"update"}', true)
       assert.strictEqual(res.type, 'invalid')
       assert.deepEqual(res.payload, {code: -32600, message: 'Invalid request', data: {id: 123, method: 'update'}})
 
@@ -323,7 +323,7 @@ function test (jsonrpc) {
       var errorObj = jsonrpc.error('123', jsonrpc.JsonRpcError.parseError())
       assert.deepEqual(jsonrpc.parse(JSON.stringify(errorObj)).payload, errorObj)
 
-      var parsedBatch = jsonrpc.parse(JSON.stringify([requestObj, notificationObj, successObj, errorObj, {}]))
+      var parsedBatch = jsonrpc.parse(JSON.stringify([requestObj, notificationObj, successObj, errorObj, {}]), true)
 
       assert.strictEqual(parsedBatch[0].type, 'request')
       assert.deepEqual(parsedBatch[0].payload, requestObj)

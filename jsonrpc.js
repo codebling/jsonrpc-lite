@@ -94,6 +94,7 @@
    * success, error, or invalid), and return it's type and properly formatted object.
    *
    * @param  {String} msg
+   * @param  {Boolean} set to true to require the presence of "jsonrpc":"2.0" field. Default: false
    * @return {Object|Array} an array, or an object of this format:
    *
    *  {
@@ -103,7 +104,7 @@
    *
    * @api public
    */
-  jsonrpc.parse = function (message) {
+  jsonrpc.parse = function (message, isStrict) {
     if (!message || typeof message !== 'string') {
       return new JsonRpcParsed(JsonRpcError.invalidRequest(message), 'invalid')
     }
@@ -114,10 +115,10 @@
       return new JsonRpcParsed(JsonRpcError.parseError(message), 'invalid')
     }
 
-    if (!isArray(message)) return parseObject(message)
+    if (!isArray(message)) return parseObject(message, isStrict)
     if (!message.length) return new JsonRpcParsed(JsonRpcError.invalidRequest(message), 'invalid')
     for (var i = 0, len = message.length; i < len; i++) {
-      message[i] = parseObject(message[i])
+      message[i] = parseObject(message[i], isStrict)
     }
 
     return message
@@ -129,6 +130,7 @@
    * success, error, or invalid), and return it's type and properly formatted object.
    *
    * @param  {Object} msg
+   * @param  {Boolean} set to true to require the presence of "jsonrpc":"2.0" field. Default: false
    * @return {Object|Array} an array, or an object of this format:
    *
    *  {
@@ -139,11 +141,12 @@
    * @api public
    */
   jsonrpc.parseObject = parseObject
-  function parseObject (obj) {
+  function parseObject (obj, isStrict) {
     var error = null
     var payload = null
 
-    if (!obj || obj.jsonrpc !== JsonRpc.VERSION) error = JsonRpcError.invalidRequest(obj)
+    if (!obj || typeof obj !== 'object') error = JsonRpcError.invalidRequest(obj)
+    else if (isStrict && obj.jsonrpc !== JsonRpc.VERSION) error = JsonRpcError.invalidRequest(obj)
     else if (!hasOwnProperty.call(obj, 'id')) {
       payload = new NotificationObject(obj.method, obj.params)
       error = validateMessage(payload)
