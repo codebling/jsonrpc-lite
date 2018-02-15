@@ -28,7 +28,11 @@
 
   var jsonrpc = {
     JsonRpc: JsonRpc,
-    JsonRpcError: JsonRpcError
+    JsonRpcError: JsonRpcError,
+    RequestObject: RequestObject,
+    NotificationObject: NotificationObject,
+    SuccessObject: SuccessObject,
+    ErrorObject: ErrorObject
   }
 
   /**
