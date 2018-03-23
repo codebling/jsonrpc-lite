@@ -215,6 +215,7 @@
   function SuccessObject (id, result) {
     JsonRpc.call(this)
     this.id = id
+    this.error = null
     this.result = result
   }
 

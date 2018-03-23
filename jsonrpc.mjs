@@ -58,6 +58,7 @@ class SuccessObject extends JsonRpc {
     super()
 
     this.id = id
+    this.error = null
     this.result = result
   }
 }
