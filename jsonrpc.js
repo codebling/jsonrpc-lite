@@ -72,8 +72,8 @@
    * @return {Object} JsonRpc object
    * @api public
    */
-  jsonrpc.success = function (id, result) {
-    var object = new SuccessObject(id, result)
+  jsonrpc.success = function (id, result, explicitNullError) {
+    var object = new SuccessObject(id, result, explicitNullError)
     validateMessage(object, true)
     return object
   }
@@ -108,7 +108,7 @@
    *
    * @api public
    */
-  jsonrpc.parse = function (message, isStrict) {
+  jsonrpc.parse = function (message, isStrict, explicitNullError) {
     if (!message || typeof message !== 'string') {
       return new JsonRpcParsed(JsonRpcError.invalidRequest(message), 'invalid')
     }
@@ -122,7 +122,7 @@
     if (!isArray(message)) return parseObject(message, isStrict)
     if (!message.length) return new JsonRpcParsed(JsonRpcError.invalidRequest(message), 'invalid')
     for (var i = 0, len = message.length; i < len; i++) {
-      message[i] = parseObject(message[i], isStrict)
+      message[i] = parseObject(message[i], isStrict, explicitNullError)
     }
 
     return message
@@ -145,7 +145,7 @@
    * @api public
    */
   jsonrpc.parseObject = parseObject
-  function parseObject (obj, isStrict) {
+  function parseObject (obj, isStrict, explicitNullError) {
     var error = null
     var payload = null
 
@@ -158,7 +158,7 @@
       payload = new RequestObject(obj.id, obj.method, obj.params)
       error = validateMessage(payload)
     } else if (hasOwnProperty.call(obj, 'result')) {
-      payload = new SuccessObject(obj.id, obj.result)
+      payload = new SuccessObject(obj.id, obj.result, explicitNullError)
       error = validateMessage(payload)
     } else if (hasOwnProperty.call(obj, 'error')) {
       if (!obj.error) {
@@ -184,8 +184,9 @@
    * @return {Object} JsonRpc object
    * @api public
    */
-  function JsonRpc () {
+  function JsonRpc (explicitNullError) {
     this.jsonrpc = '2.0'
+    this.explicitNullError = explicitNullError === undef ? false : Boolean(explicitNullError)
   }
 
   JsonRpc.VERSION = '2.0'
@@ -212,9 +213,10 @@
   inherits(NotificationObject, JsonRpc)
   NotificationObject.prototype.name = 'notification'
 
-  function SuccessObject (id, result) {
+  function SuccessObject (id, result, explicitNullError) {
     JsonRpc.call(this)
     this.id = id
+    if (this.explicitNullError)
     this.error = null
     this.result = result
   }

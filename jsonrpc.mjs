@@ -54,10 +54,11 @@ class NotificationObject extends JsonRpc {
 NotificationObject.prototype.name = 'notification'
 
 class SuccessObject extends JsonRpc {
-  constructor (id, result) {
+  constructor (id, result, explicitNullError) {
     super()
 
     this.id = id
+    if (explicitNullError === undef ? false : Boolean(explicitNullError))
     this.error = null
     this.result = result
   }
@@ -172,8 +173,8 @@ jsonrpc.notification = function (method, params) {
  * @return {Object} JsonRpc object
  * @api public
  */
-jsonrpc.success = function (id, result) {
-  let object = new SuccessObject(id, result)
+jsonrpc.success = function (id, result, explicitNullError) {
+  let object = new SuccessObject(id, result, explicitNullError)
   validateMessage(object, true)
   return object
 }
@@ -208,7 +209,7 @@ jsonrpc.error = function (id, error) {
  *
  * @api public
  */
-jsonrpc.parse = function (message, isStrict) {
+jsonrpc.parse = function (message, isStrict, explicitNullError) {
   if (!message || typeof message !== 'string') {
     return new JsonRpcParsed(JsonRpcError.invalidRequest(message), 'invalid')
   }
@@ -222,7 +223,7 @@ jsonrpc.parse = function (message, isStrict) {
   if (!isArray(message)) return parseObject(message, isStrict)
   if (!message.length) return new JsonRpcParsed(JsonRpcError.invalidRequest(message), 'invalid')
   for (let i = 0, len = message.length; i < len; i++) {
-    message[i] = parseObject(message[i], isStrict)
+    message[i] = parseObject(message[i], isStrict, explicitNullError)
   }
 
   return message
@@ -245,7 +246,7 @@ jsonrpc.parse = function (message, isStrict) {
  * @api public
  */
 jsonrpc.parseObject = parseObject
-function parseObject (obj, isStrict) {
+function parseObject (obj, isStrict, explicitNullError) {
   let error = null
   let payload = null
 
@@ -258,7 +259,7 @@ function parseObject (obj, isStrict) {
     payload = new RequestObject(obj.id, obj.method, obj.params)
     error = validateMessage(payload)
   } else if (hasOwnProperty.call(obj, 'result')) {
-    payload = new SuccessObject(obj.id, obj.result)
+    payload = new SuccessObject(obj.id, obj.result, explicitNullError)
     error = validateMessage(payload)
   } else if (hasOwnProperty.call(obj, 'error')) {
     if (!obj.error) {
